@@ -1,0 +1,86 @@
+<html>
+<head>
+    <meta name="viewport" content="width=device-width">
+    <script src="ds:/Sys/app.js"></script>
+    <link rel="stylesheet" href="snd_style.css">
+</head>
+
+<script>
+    // Firebase scriptlar
+    app.LoadScript("Html/firebase-app.js");
+    app.LoadScript("Html/firebase-auth.js");
+    app.LoadScript("Html/firebase-database.js");
+    
+    let database; // global o'zgaruvchi
+    let NUMBER = "";
+    let MESSAGE = "";
+    
+    function OnStart() {
+        app.Script("snd_config.js", true);
+        cfg = CFG();
+
+        database = initDB(cfg);
+        
+        if( database ) app.ShowPopup("BAZAGA ULANDI")
+        else app.ShowPopup("FIREBASE ULANISH XATOSI")
+    
+      ///////////////////////////////
+     // ===== SERVICE TIME =====  //
+    ///////////////////////////////
+    
+        // Service bilan bog'lanish
+        svc = app.CreateService("this", "this", OnServiceReady);
+        svc.SetOnMessage(OnServiceMessage);
+    
+        // Service ni foreground qilish
+        svc.SetInForeground("OCR Service", "JSON monitoring active");
+    
+        // Telefon restart bo'lsa ham ishlasin
+        app.SetAutoBoot("Service");
+    
+        app.ShowPopup("Service ishga tushdi");
+    }
+    
+    function OnServiceReady() {
+        app.ShowPopup("Service tayyor");
+    }
+    
+    function OnServiceMessage(msg) {
+        NUMBER = msg;
+        app.ShowPopup(msg);
+        
+        MESSAGE = "SALOMAT" + NUMBER;
+    }
+    
+    function OnStop() {
+        app.Debug("App yopildi lekin service ishlaydi");
+    }
+    
+    ///////////////////////////////////////////////////////////
+    ///         ASOSIY FIREBASE FUNKSIYALARI                ///
+    ///////////////////////////////////////////////////////////
+    function initDB(cfg){
+        firebase.initializeApp(cfg);
+        return firebase.database();    
+    }
+</script>
+
+<style>
+    
+</style>
+
+<body onload="OnStart()">
+    <div class="hello">📊 DB Testing & Management</div>
+
+    <div class="container">
+        <div class="button-group">
+            <button onclick="app.ShowPopup(MESSAGE)">💬 Show Popup</button>
+        </div>
+
+        <div class="stats-panel" id="statsPanel">
+            <!-- Statistika JS orqali to'ldiriladi -->
+        </div>
+
+    </div>
+</body>
+</html>
